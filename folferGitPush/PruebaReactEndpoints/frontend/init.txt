@@ -1,0 +1,94 @@
+npx create-next-app@latest
+npm install @mui/icons-material @mui/material @emotion/styled @emotion/react
+
+interface Somethig {
+    values
+}
+
+example 
+"use client";
+
+import {
+    Button,
+    TextField,
+    Container,
+    Paper,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody
+} from "@mui/material";
+
+import AddIcon from "@mui/icons-material/Add";
+import { useEffect, useState } from "react";
+
+interface University {
+    alpha_two_code: string;
+    name: string;
+    country: string;
+    state: string;
+    domains: string;
+    web_pages: string;
+}
+export default function UniversitysHome() {
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [universities, setUniversities] = useState<University[]>([]);
+    const [Country, setCountry] = useState<string>("");
+
+    const fetchUniversities = async () => {
+          try {
+    const response = await fetch(`/api/universities?country=${encodeURIComponent(Country)}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const json = await response.json();
+    setUniversities(json);
+    console.log(json);
+  } catch (err: any) {
+    setError(err.message || "Error fetching Universities");
+  } finally {
+    setLoading(false);
+  }
+    };
+      function handleCountryChange(event: React.ChangeEvent<HTMLInputElement>) {
+        setCountry(event.target.value);
+    }
+    return (
+        <Container maxWidth="lg" className="mt-4">
+            <TextField id="university_param" label="Country"
+variant="outlined" onInput={handleCountryChange}/>
+            <Button id="Search" variant="contained" color="primary"
+startIcon={<AddIcon />} onClick={() => fetchUniversities()}/>
+                <Paper elevation={3} className="overflow-x-auto">
+                    <Table>
+                        <TableHead className="bg-gray-200">
+                            <TableRow>
+                              <TableCell> Codigo </TableCell>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Pais</TableCell>
+                                <TableCell></TableCell>
+                                <TableCell>Dominio Web</TableCell>
+                                <TableCell>Paginas Web</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {universities.map((University) => (
+                                <TableRow >
+                                  <TableCell>{University.alpha_two_code}</TableCell>
+                                    <TableCell>{University.name}</TableCell>
+                                    <TableCell>{University.country}</TableCell>
+                                    <TableCell>{University.state}</TableCell>
+                                    <TableCell>{University.domains}</TableCell>
+                                    <TableCell>{University.web_pages}</TableCell>
+                                      </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </Paper>
+        </Container>
+    );
+}
